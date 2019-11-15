@@ -53,8 +53,14 @@ void slist_init(slist_t *);
 /** Destroy and de-allocate the memory hold by a list
 	\param list - a pointer to an existing list
 	\param dealloc flag that indicates whether stored data should also be de-allocated */
-void slist_destroy(slist_t *,slist_destroy_t);
+/*void slist_destroy(slist_t *,slist_destroy_t);
 
+    slist_node_t *tmp;
+    While(slist_head(list) !=NULL)
+    tmp=slist_head(list);
+    If(flag==1)
+    free(slist_data(slist_head(list))
+}*/
 /** Pop the first element in the list
 	\param list - a pointer to a list
 	\return a pointer to the data of the element, or NULL if the list is empty */
