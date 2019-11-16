@@ -27,6 +27,8 @@ struct slist
     unsigned int size; // The number of elements in the list
 };
 
+
+
 //! Single linked list type
 typedef struct slist slist_t;
 
@@ -49,6 +51,7 @@ typedef enum { SLIST_LEAVE_DATA = 0, SLIST_FREE_DATA } slist_destroy_t;
 /** Initialize a single linked list
 	\param list - the list to initialize */
 void slist_init(slist_t *);
+
 
 /** Destroy and de-allocate the memory hold by a list
 	\param list - a pointer to an existing list
