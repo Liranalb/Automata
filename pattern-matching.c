@@ -35,6 +35,7 @@ int pm_init(pm_t *fsm) { //NEED TESTING
 
 int pm_goto_set(pm_state_t *from_state, unsigned char symbol, pm_state_t *to_state) { //NEEDS TESTING
     if(from_state == NULL || to_state == NULL) {
+        printf("Cannot allocate initial memory for data\n");
         return -1;
     }
 
@@ -51,7 +52,41 @@ int pm_goto_set(pm_state_t *from_state, unsigned char symbol, pm_state_t *to_sta
 
 }
 
+
+pm_state_t* pm_goto_get(pm_state_t *state, unsigned char symbol) {
+    if(state == NULL) {
+        printf("Cannot allocate initial memory for data\n");
+        return NULL;
+    }
+
+    slist_node_t* tmp = state-> slist_head(_transitions); //create a temp list for checking the trans list
+    while(tmp != NULL) {
+        pm_labeled_edge_t* newEdge = ((pm_labeled_edge_t*)slist_data(tmp)); //create a new arc
+        if(newEdge->label == symbol) { //check if we have a symbol match at the arc
+            return newEdge->state; // if so, return the arc state
+        }
+    }
+
+    return NULL; // no transition found, return NULL
+}
+
+
 /*
+
+    if (list == NULL) { //checking if the list is empty
+        return;
+    }
+
+    slist_node_t *tmp; // may need allocation
+
+    while(slist_head(list) !=NULL) {
+        tmp = slist_head(list);
+        slist_head(list) = slist_next(slist_head(list)); //check this line
+        if(dealloc) //CHECK
+            free(slist_data(tmp));
+        free(tmp);
+    }
+    free(list);
 
 
 struct pm_labeled_edge {
