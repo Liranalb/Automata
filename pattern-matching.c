@@ -53,7 +53,7 @@ int pm_goto_set(pm_state_t *from_state, unsigned char symbol, pm_state_t *to_sta
 }
 
 
-pm_state_t* pm_goto_get(pm_state_t *state, unsigned char symbol) {
+pm_state_t* pm_goto_get(pm_state_t *state, unsigned char symbol) { //NEED TESTING
     if(state == NULL) {
         printf("Cannot allocate initial memory for data\n");
         return NULL;
@@ -72,41 +72,21 @@ pm_state_t* pm_goto_get(pm_state_t *state, unsigned char symbol) {
 
 
 /*
-
-    if (list == NULL) { //checking if the list is empty
-        return;
+int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
+    if (pm == NULL || n == NULL) {
+        printf("Cannot allocate initial memory for data\n");
+        return -1;
     }
 
-    slist_node_t *tmp; // may need allocation
+    pm_state_t *currentRoot = pm->zerostate;
+    pm_state_t *next;
 
-    while(slist_head(list) !=NULL) {
-        tmp = slist_head(list);
-        slist_head(list) = slist_next(slist_head(list)); //check this line
-        if(dealloc) //CHECK
-            free(slist_data(tmp));
-        free(tmp);
+    for(int i = 0; i < n; i++){
+
     }
-    free(list);
+}
 
-
-struct pm_labeled_edge {
-    unsigned char label;  //the character "on" this edge
-    struct pm_state *state; //the destination state
-};
-
-typedef struct pm_labeled_edge pm_labeled_edge_t;
-
-
-
- * (slist_t*)malloc(sizeof(slist_t));
-pm_state_t
-struct pm_state
-{
-    pm_int_t id;
-    pm_int_t depth;
-    slist_t* output;  //list of patterns
-    struct pm_state * fail; //failure function, pointer to the state that we should go when there is no transition
-    slist_t* _transitions; //list of edges
-};
 
 */
+
+

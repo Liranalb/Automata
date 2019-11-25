@@ -5,7 +5,8 @@
   @brief implementation of pattern matching algorithm.
 
   */
-
+#include <stdlib.h>
+#include <stdio.h>
 #include "slist.h"
 
 #ifndef PATTERN_MATCHING_H

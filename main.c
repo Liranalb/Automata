@@ -1,9 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "slist.h"
+#include "pattern-matching.h"
 
 
 int main() {
+    pm_t* tree = (pm_t*)malloc(sizeof(pm_t));
+    pm_init(tree);
+    printf("#Init zerostate Test:\nID: %d", tree->zerostate->id);
+    printf(":\nDepth: %d", tree->zerostate->depth);
+    char* str = "TEST";
+    char* str2 = "TEST2";
+    void* test = pm_goto_get(tree->zerostate, 'v');
+    printf("\ngoto_get: %d", test);
+
+
     slist_t* list = (slist_t*)malloc(sizeof(slist_t));
     slist_t* list2 = (slist_t*)malloc(sizeof(slist_t));
 

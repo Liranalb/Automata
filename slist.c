@@ -3,7 +3,7 @@
 #include "slist.h"
 #include <stdlib.h>
 
-void slist_init(slist_t * list) { //TEST NEEDED
+void slist_init(slist_t * list) {
     if (list == NULL) { //checking if the list is empty
         return;
     }
@@ -14,7 +14,7 @@ void slist_init(slist_t * list) { //TEST NEEDED
 }
 
 
-void slist_destroy(slist_t * list,slist_destroy_t dealloc) { //TEST NEEDED
+void slist_destroy(slist_t * list,slist_destroy_t dealloc) {
     if (list == NULL) { //checking if the list is empty
         return;
     }
@@ -23,7 +23,7 @@ void slist_destroy(slist_t * list,slist_destroy_t dealloc) { //TEST NEEDED
 
     while(slist_head(list) !=NULL) {
         tmp = slist_head(list);
-        slist_head(list) = slist_next(slist_head(list)); //check this line
+        slist_head(list) = slist_next(slist_head(list));
         if(dealloc) //CHECK
             free(slist_data(tmp));
         free(tmp);
@@ -31,7 +31,7 @@ void slist_destroy(slist_t * list,slist_destroy_t dealloc) { //TEST NEEDED
     free(list);
 }
 
-int slist_append(slist_t *list,void *data) { //TEST NEEDED
+int slist_append(slist_t *list,void *data) {
 
     if (list == NULL) { // checking if allocation succeed
         return -1;
@@ -43,7 +43,7 @@ int slist_append(slist_t *list,void *data) { //TEST NEEDED
         return -1;
     }
 
-    slist_data(tmp) = data; //CHECK if & is needed
+    slist_data(tmp) = data;
 
     if (slist_head(list) == NULL){ //if there is no head in the list
         slist_head(list) = tmp;
@@ -60,7 +60,7 @@ int slist_append(slist_t *list,void *data) { //TEST NEEDED
     return 0;
 }
 
-void *slist_pop_first(slist_t * list) { //TEST NEEDED. CHEACK IF WORKS IN A CASE OF LIST = 1
+void *slist_pop_first(slist_t * list) {
     if (list == NULL) { //checking if the list is empty
         return NULL;
     }
@@ -73,7 +73,7 @@ void *slist_pop_first(slist_t * list) { //TEST NEEDED. CHEACK IF WORKS IN A CASE
     return oldData; //CHECK
 }
 
-int slist_prepend(slist_t *list,void *data) { //TEST NEEDED
+int slist_prepend(slist_t *list,void *data) {
     if (list == NULL) { // checking if allocation succeed
         return -1;
     }
