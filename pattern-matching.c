@@ -39,6 +39,8 @@ int pm_goto_set(pm_state_t *from_state, unsigned char symbol, pm_state_t *to_sta
         return -1;
     }
 
+    printf("%d -> %c -> %d\n", from_state->id, symbol, to_state->id);
+
     pm_labeled_edge_t *newEdge = (pm_labeled_edge_t*)malloc(sizeof(pm_labeled_edge_t)); //creating a new arc
     if (newEdge == NULL) { // checking arc allocation
         printf("Cannot allocate initial memory for data\n");
@@ -71,7 +73,7 @@ pm_state_t* pm_goto_get(pm_state_t *state, unsigned char symbol) { //NEED TESTIN
 }
 
 
-/*
+
 int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
     if (pm == NULL || n == NULL) {
         printf("Cannot allocate initial memory for data\n");
@@ -82,11 +84,50 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
     pm_state_t *next;
 
     for(int i = 0; i < n; i++){
+        if((next = pm_goto_get(currentRoot,str[i])) == NULL) { //current state is empty
+            pm_state_t *state = (pm_state_t *) malloc(sizeof(pm_state_t)); //create a new state
+            if (state == NULL) { //checking allocation
+                printf("Cannot allocate initial memory for data\n");
+                return -1;
+            }
 
-    }
+            printf("Allocating state %d\n", pm->newstate);
+
+            state->depth = currentRoot->depth+1;
+            state->id = pm->newstate;
+            state->fail=NULL;
+
+            state->output = (slist_t*)malloc(sizeof(slist_t));
+            state->_transitions = (slist_t*)malloc(sizeof(slist_t));
+
+            if(state->output == NULL || state->_transitions == NULL) {
+                printf("Cannot allocate initial memory for data\n");
+                return -1;
+            }
+
+            slist_init(state->_transitions); //creating alloction for the new state lists
+            slist_init(state->output);
+            pm->newstate++;
+
+            if(pm_goto_set(currentRoot, str[i], state) == -1) { //setting the arc
+                return -1;
+            }
+            currentRoot = next; //finish building the state. go to the next one
+        }
+
+
+
+        else {
+                    currentRoot = next; //state exist -> go to the next state
+             }
+    } //loop end
+
+    slist_append(currentRoot->output, str); //ADD CHECKS FOR THE LIST
+
+    return 0; //return 0 on success
 }
 
 
-*/
+
 
 
