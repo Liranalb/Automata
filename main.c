@@ -8,11 +8,23 @@ int main() {
     pm_t* tree = (pm_t*)malloc(sizeof(pm_t));
     pm_init(tree);
     printf("#Init zerostate Test:\nID: %d", tree->zerostate->id);
-    printf(":\nDepth: %d", tree->zerostate->depth);
-    char* str = "TEST";
-    char* str2 = "TEST2";
-    void* test = pm_goto_get(tree->zerostate, 'v');
-    printf("\ngoto_get: %d", test);
+    printf(":\nDepth: %d\n\n", tree->zerostate->depth);
+
+    printf("####### Testing add_string: #######\n");
+
+    pm_addstring(tree, "e", 1);
+    pm_addstring(tree, "be", 2);
+    pm_addstring(tree, "bd", 2);
+    pm_addstring(tree, "bcd", 3);
+    pm_addstring(tree, "cdbcab", 5);
+    pm_addstring(tree, "bcaa", 4);
+
+    pm_makeFSM(tree);
+
+
+/*
+
+
 
 
     slist_t* list = (slist_t*)malloc(sizeof(slist_t));
@@ -44,7 +56,7 @@ int main() {
     slist_destroy(list2, SLIST_LEAVE_DATA);
 
     free(list);
-    free(list2);
+    free(list2);*/
     return 0;
 
 }

@@ -39,7 +39,7 @@ int pm_goto_set(pm_state_t *from_state, unsigned char symbol, pm_state_t *to_sta
         return -1;
     }
 
-    printf("%d -> %c -> %d\n", from_state->id, symbol, to_state->id);
+//    printf("Setting f(%d) = %d", from_state->id, to_state->id);
 
     pm_labeled_edge_t *newEdge = (pm_labeled_edge_t*)malloc(sizeof(pm_labeled_edge_t)); //creating a new arc
     if (newEdge == NULL) { // checking arc allocation
@@ -96,7 +96,7 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
             state->depth = currentRoot->depth+1;
             state->id = pm->newstate;
             state->fail=NULL;
-
+            printf("\nTest 1\n");
             state->output = (slist_t*)malloc(sizeof(slist_t));
             state->_transitions = (slist_t*)malloc(sizeof(slist_t));
 
@@ -104,10 +104,13 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
                 printf("Cannot allocate initial memory for data\n");
                 return -1;
             }
+            printf("\nTest 2\n");
 
             slist_init(state->_transitions); //creating alloction for the new state lists
             slist_init(state->output);
             pm->newstate++;
+
+            printf("\nTest 3\n");
 
             if(pm_goto_set(currentRoot, str[i], state) == -1) { //setting the arc
                 return -1;
@@ -121,13 +124,61 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
                     currentRoot = next; //state exist -> go to the next state
              }
     } //loop end
+    printf("\nTest 4\n");
 
-    slist_append(currentRoot->output, str); //ADD CHECKS FOR THE LIST
+
+    slist_append(currentRoot->output, str); //FIX THIS LINE - GETTING SIGSEGV!
+
 
     return 0; //return 0 on success
 }
 
+int pm_makeFSM(pm_t *pm) {
+    if (pm == NULL)
+        return -1;
 
+    slist_t *q = (slist_t *) malloc(sizeof(slist_t));
+    if (q == NULL) {
+        printf("Cannot allocate initial memory for data\n");
+        return -1;
+    }
 
+    slist_init(q); // initiate queue
 
+    slist_node_t *node;
+    for (node = pm->zerostate->slist_head(_transitions); node != NULL; node = slist_next(node)) {
+        pm_state_t *state = ((pm_labeled_edge_t *) slist_data(node))->state;
+        if (slist_append(q, state) == -1) {
+            return -1;
+        }
 
+        state->fail = pm->zerostate; //initiate the first fail state to be the root
+    }
+
+    for (; slist_size(q) != 0;) { //check loop
+        pm_state_t *red = slist_pop_first(q);
+
+        //going over the transitions list
+        for (node = red->slist_head(_transitions); node != NULL; node = slist_next(node)) {
+            pm_labeled_edge_t *edge = ((pm_labeled_edge_t *) slist_data(node));
+            pm_state_t *current = edge->state;
+
+            if (slist_append(q, current) == -1) {
+                return -1;
+            }
+
+            pm_state_t *state = red->fail;
+            pm_state_t *failState;
+
+            while ((failState = pm_goto_get(state, edge->label)) == NULL) {
+                state = state->fail;
+            }
+
+            current->fail = failState;
+            printf("Settings f(%d) = %d\n", current->id, current->fail->id);
+            if (slist_append_list(current->output, current->fail->output) == -1) {
+                return -1;
+            }
+        }
+    }
+}
