@@ -24,7 +24,7 @@ void slist_destroy(slist_t * list,slist_destroy_t dealloc) {
     while(slist_head(list) !=NULL) {
         tmp = slist_head(list);
         slist_head(list) = slist_next(slist_head(list));
-        if(dealloc) //CHECK
+        if(dealloc) //check
             free(slist_data(tmp));
         free(tmp);
     }
@@ -33,7 +33,9 @@ void slist_destroy(slist_t * list,slist_destroy_t dealloc) {
 
 int slist_append(slist_t *list,void *data) {
 
-    if (list == NULL) { // checking if allocation succeed
+    //printf("\nStarting append\n");
+
+    if (list == NULL || data == NULL) { // checking if allocation succeed
         return -1;
     }
 
@@ -48,14 +50,14 @@ int slist_append(slist_t *list,void *data) {
     if (slist_head(list) == NULL){ //if there is no head in the list
         slist_head(list) = tmp;
         slist_tail(list) = tmp;
-        slist_size(list) = 1;
+        //printf("\ninside append 1\n");
         return 0;
     }
 
     slist_next(slist_tail(list))= tmp; //old tail points at
     slist_tail(list) = tmp;
-    slist_next(slist_tail(list)) = NULL;
     slist_size(list)++;
+    //printf("\ninside append 2\n");
 
     return 0;
 }

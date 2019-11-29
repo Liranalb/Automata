@@ -12,12 +12,12 @@ int main() {
 
     printf("####### Testing add_string: #######\n");
 
-    pm_addstring(tree, "e", 1);
-    pm_addstring(tree, "be", 2);
-    pm_addstring(tree, "bd", 2);
-    pm_addstring(tree, "bcd", 3);
-    pm_addstring(tree, "cdbcab", 5);
-    pm_addstring(tree, "bcaa", 4);
+    //pm_addstring(tree, "e", 1);
+   // pm_addstring(tree, "be", 2);
+   // pm_addstring(tree, "bd", 2);
+   pm_addstring(tree, "bcd", 3);
+   // pm_addstring(tree, "cdbcab", 6);
+    //pm_addstring(tree, "bcaa", 4);
 
     pm_makeFSM(tree);
 

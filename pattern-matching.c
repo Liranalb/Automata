@@ -75,15 +75,19 @@ pm_state_t* pm_goto_get(pm_state_t *state, unsigned char symbol) { //NEED TESTIN
 
 
 int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
-    if (pm == NULL || n == NULL) {
-        printf("Cannot allocate initial memory for data\n");
+    if (pm == NULL || str == NULL)
         return -1;
+
+    if(n == 0) {
+        printf("the string is empty");
+        return 0;
     }
 
     pm_state_t *currentRoot = pm->zerostate;
     pm_state_t *next;
+    int i;
 
-    for(int i = 0; i < n; i++){
+    for(i = 0; i < n; i++){
         if((next = pm_goto_get(currentRoot,str[i])) == NULL) { //current state is empty
             pm_state_t *state = (pm_state_t *) malloc(sizeof(pm_state_t)); //create a new state
             if (state == NULL) { //checking allocation
@@ -91,44 +95,61 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
                 return -1;
             }
 
+            printf("\ntest - next = null --> creating a new state\n");
             printf("Allocating state %d\n", pm->newstate);
 
-            state->depth = currentRoot->depth+1;
+            state->depth = currentRoot->depth + 1;
             state->id = pm->newstate;
-            state->fail=NULL;
-            printf("\nTest 1\n");
-            state->output = (slist_t*)malloc(sizeof(slist_t));
-            state->_transitions = (slist_t*)malloc(sizeof(slist_t));
+            state->fail = NULL;
+            printf("\ntest: depth of the state is: %d\n", state->depth);
+            state->output = (slist_t *) malloc(sizeof(slist_t));
+            state->_transitions = (slist_t *) malloc(sizeof(slist_t));
 
-            if(state->output == NULL || state->_transitions == NULL) {
+            if (state->output == NULL || state->_transitions == NULL) {
                 printf("Cannot allocate initial memory for data\n");
                 return -1;
             }
-            printf("\nTest 2\n");
+            printf("finish alloction for output and transition\n");
 
             slist_init(state->_transitions); //creating alloction for the new state lists
             slist_init(state->output);
             pm->newstate++;
 
-            printf("\nTest 3\n");
+            printf("finish init for transitions and output\n");
+            printf("state->output size is: %d\n", state->output->size);
+            printf("state->transitions size is: %d\n", state->_transitions->size);
+            printf("state->id is: %d\n", state->id);
+            printf("pm->newstate is: %d\n", pm->newstate);
 
-            if(pm_goto_set(currentRoot, str[i], state) == -1) { //setting the arc
+            if (pm_goto_set(currentRoot, str[i], state) == -1) { //setting the arc
                 return -1;
             }
-            currentRoot = next; //finish building the state. go to the next one
+
+            currentRoot = state;
         }
 
 
-
         else {
-                    currentRoot = next; //state exist -> go to the next state
+            printf("test 7 - next != null");
+            if((next == pm_goto_get(currentRoot, str[i]) != NULL)) {
+               printf("test 6"); // not working
+                currentRoot = next; //state exist -> go to the next state
+              }
              }
-    } //loop end
+        printf("goto_get on current root succeed\n");
+
+        if((next = pm_goto_get(currentRoot, str[i]) != NULL)) {
+            currentRoot = next; //finish building the state. go to the next one
+            printf("creating an arc between current and next. current is now next \n");
+        }
+    }
+     //loop end
     printf("\nTest 4\n");
 
 
     slist_append(currentRoot->output, str); //FIX THIS LINE - GETTING SIGSEGV!
 
+    printf("\nTest 5\n");
 
     return 0; //return 0 on success
 }
