@@ -67,6 +67,7 @@ pm_state_t* pm_goto_get(pm_state_t *state, unsigned char symbol) { //NEED TESTIN
         if(newEdge->label == symbol) { //check if we have a symbol match at the arc
             return newEdge->state; // if so, return the arc state
         }
+        tmp = slist_next(tmp);
     }
 
     return NULL; // no transition found, return NULL
