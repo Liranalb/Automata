@@ -156,10 +156,8 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
 }
 
 int pm_makeFSM(pm_t *pm) {
-    if (pm == NULL)
-        return -1;
 
-    slist_t *q = (slist_t *) malloc(sizeof(slist_t));
+    slist_t *q = (slist_t*)malloc(sizeof(slist_t));
     if (q == NULL) {
         printf("Cannot allocate initial memory for data\n");
         return -1;
@@ -169,7 +167,7 @@ int pm_makeFSM(pm_t *pm) {
 
     slist_node_t *node;
     for (node = pm->zerostate->slist_head(_transitions); node != NULL; node = slist_next(node)) {
-        pm_state_t *state = ((pm_labeled_edge_t *) slist_data(node))->state;
+        pm_state_t *state = ((pm_labeled_edge_t*) slist_data(node))->state;
         if (slist_append(q, state) == -1) {
             return -1;
         }
@@ -177,12 +175,12 @@ int pm_makeFSM(pm_t *pm) {
         state->fail = pm->zerostate; //initiate the first fail state to be the root
     }
 
-    for (; slist_size(q) != 0;) { //check loop
+    while(slist_size(q) > 0) {
         pm_state_t *red = slist_pop_first(q);
 
         //going over the transitions list
         for (node = red->slist_head(_transitions); node != NULL; node = slist_next(node)) {
-            pm_labeled_edge_t *edge = ((pm_labeled_edge_t *) slist_data(node));
+            pm_labeled_edge_t *edge = ((pm_labeled_edge_t *)slist_data(node));
             pm_state_t *current = edge->state;
 
             if (slist_append(q, current) == -1) {
@@ -192,7 +190,8 @@ int pm_makeFSM(pm_t *pm) {
             pm_state_t *state = red->fail;
             pm_state_t *failState;
 
-            while ((failState = pm_goto_get(state, edge->label)) == NULL) {
+            // Crash at this line:
+            while ((failState = pm_goto_get(state, edge->label)) == NULL) { //FIX SIGSEGV!!!
                 state = state->fail;
             }
 
@@ -203,4 +202,6 @@ int pm_makeFSM(pm_t *pm) {
             }
         }
     }
+    free(q);
+    return 0;
 }

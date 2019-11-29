@@ -14,7 +14,7 @@ void slist_init(slist_t * list) {
 }
 
 
-void slist_destroy(slist_t * list,slist_destroy_t dealloc) {
+void slist_destroy(slist_t * list, slist_destroy_t dealloc) {
     if (list == NULL) { //checking if the list is empty
         return;
     }
