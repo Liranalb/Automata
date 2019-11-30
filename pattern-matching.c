@@ -5,20 +5,24 @@
 #include "pattern-matching.h"
 #include "slist.h"
 
-int pm_init(pm_t *fsm) { //NEED TESTING
-    if(fsm == NULL) {
-        printf("Cannot allocate initial memory for data\n");
+//void checkSymbol(pm_t*, pm_state_t*, unsigned char);
+int failToZero(pm_t *pm_tree, slist_t* queue, slist_node_t *edge);
+void findEdge(pm_t *pm_tree, pm_state_t **fail, unsigned char symbol);
+int FStateSetAndPrint(pm_state_t **origin, pm_state_t *fail, unsigned char symbol);
+
+int pm_init(pm_t *fsm) {
+    if(!fsm) {
         return -1;
     }
 
     fsm->zerostate = (pm_state_t*)malloc(sizeof(pm_state_t)); //check
-    if (fsm->zerostate == NULL) { // checking if allocation succeed
+    if (!(fsm->zerostate)) { // checking if allocation succeed
         printf("Cannot allocate initial memory for data\n");
         return -1;
     }
 
     fsm->zerostate->_transitions = (slist_t*)malloc(sizeof(slist_t));
-    if (fsm->zerostate->_transitions == NULL) { // checking if allocation succeed
+    if (!(fsm->zerostate->_transitions)) { // checking if allocation succeed
         printf("Cannot allocate initial memory for data\n");
         return -1;
     }
@@ -34,7 +38,7 @@ int pm_init(pm_t *fsm) { //NEED TESTING
 }
 
 int pm_goto_set(pm_state_t *from_state, unsigned char symbol, pm_state_t *to_state) { //NEEDS TESTING
-    if(from_state == NULL || to_state == NULL) {
+    if(!(from_state) || !(to_state)) {
         printf("Cannot allocate initial memory for data\n");
         return -1;
     }
@@ -42,7 +46,7 @@ int pm_goto_set(pm_state_t *from_state, unsigned char symbol, pm_state_t *to_sta
     printf("%d -> %c -> %d\n", from_state->id,symbol, to_state->id);
 
     pm_labeled_edge_t *newEdge = (pm_labeled_edge_t*)malloc(sizeof(pm_labeled_edge_t)); //creating a new arc
-    if (newEdge == NULL) { // checking arc allocation
+    if (!newEdge) { // checking arc allocation
         printf("Cannot allocate initial memory for data\n");
         return -1;
     }
@@ -56,7 +60,7 @@ int pm_goto_set(pm_state_t *from_state, unsigned char symbol, pm_state_t *to_sta
 
 
 pm_state_t* pm_goto_get(pm_state_t *state, unsigned char symbol) { //NEED TESTING
-    if(state == NULL) {
+    if(!state) {
         return NULL;
     }
 
@@ -65,7 +69,6 @@ pm_state_t* pm_goto_get(pm_state_t *state, unsigned char symbol) { //NEED TESTIN
          //create a new arc
         if (((pm_labeled_edge_t*)slist_data(tmp))->label == symbol) //check if we have a symbol match at the arc
             return ((pm_labeled_edge_t*)tmp->data)->state; // if so, return the arc state
-
         tmp = slist_next(tmp);
     }
     return NULL; // no transition found, return NULL
@@ -74,12 +77,17 @@ pm_state_t* pm_goto_get(pm_state_t *state, unsigned char symbol) { //NEED TESTIN
 
 
 int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
-    if (pm == NULL || str == NULL)
+    if (!pm  || !str)
         return -1;
 
     if(n == 0) {
         printf("the string is empty");
         return 0;
+    }
+
+    if((pm->newstate + n) > PM_CHARACTERS){
+        printf("error: string exceeded max symbols (256)");
+        return -1;
     }
 
     pm_state_t *currentRoot = pm->zerostate;
@@ -89,7 +97,7 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
     for(i = 0; i < n; i++){
         if((next = pm_goto_get(currentRoot,str[i])) == NULL) { //current state is empty
             pm_state_t *state = (pm_state_t *) malloc(sizeof(pm_state_t)); //create a new state
-            if (state == NULL) { //checking allocation
+            if (!state) { //checking allocation
                 printf("Cannot allocate initial memory for data\n");
                 return -1;
             }
@@ -104,7 +112,7 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
             state->output = (slist_t *) malloc(sizeof(slist_t));
             state->_transitions = (slist_t *) malloc(sizeof(slist_t));
 
-            if (state->output == NULL || state->_transitions == NULL) {
+            if (!(state->output) || !(state->_transitions)) {
                 printf("Cannot allocate initial memory for data\n");
                 return -1;
             }
@@ -123,21 +131,19 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
             if (pm_goto_set(currentRoot, str[i], state) == -1) { //setting the arc
                 return -1;
             }
-
             currentRoot = state;
         }
 
-
         else {
             //printf("test 7 - next != null");
-            if((next == pm_goto_get(currentRoot, str[i]) != NULL)) {
+            if(next == pm_goto_get(currentRoot, str[i])) {
                //printf("test 6");
                 currentRoot = next; //state exist -> go to the next state
               }
              }
         //printf("goto_get on current root succeed\n");
 
-        if((next = pm_goto_get(currentRoot, str[i]) != NULL)) {
+        if(next = pm_goto_get(currentRoot, str[i])) {
             currentRoot = next; //finish building the state. go to the next one
             printf("creating an arc between current and next. current is now next \n");
         }
@@ -153,38 +159,95 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
     return 0; //return 0 on success
 }
 
-int pm_makeFSM(pm_t *pm_tree)
-{
-    if(pm_tree == NULL)
-        return -1;
 
-    slist_t *queue = (slist_t*)malloc(sizeof(slist_t)); // creating a new queue
-    if(queue == NULL) { // checking alloction
-        //destroy tree
+
+
+int pm_makeFSM(pm_t *pm_tree){
+    slist_t* queue = (slist_t*)malloc(sizeof(slist_t));
+    if (!queue){
+        //pm_destroy(pm_tree);
         return -1;
     }
 
-    slist_init(queue); //intiate tree
-    // creating a new edge and setting it to be the head of trans of the first state
-    slist_node_t *edge = slist_head(pm_tree->zerostate->_transitions);
+    slist_init(queue); //initiate queue
+    slist_node_t* edge = slist_head(pm_tree->zerostate->_transitions);
+    if(failToZero(pm_tree, queue, edge) == -1)  //define zerostate to the first level states
+        return -1;
 
-    //create a failure state for the dept = 1 to be the zerostate
-    while(edge != NULL) {
-        pm_state_t *tmp_state = ((pm_labeled_edge_t*)slist_data(edge));
-        if(slist_append(queue, tmp_state) == -1) {
-            //destroy tree;
-            return -1;
+
+    while (slist_size(queue) > 0){
+        pm_state_t *current = slist_pop_first(queue); //check the first-in-line state
+        if (!current) //if queue is empty, exit
+            break;
+
+        edge = slist_head(current->_transitions);
+
+        while (edge){
+            pm_state_t* origin = ((pm_labeled_edge_t*)slist_data(edge))->state;
+            if (slist_append(queue, origin) == -1) {
+                //pm_destroy(pm_tree);
+                return -1;
+            }
+
+            pm_state_t *fail_status = current->fail;
+            unsigned char symbol = ((pm_labeled_edge_t*)slist_data(edge))->label;
+            findEdge(pm_tree, &(fail_status), symbol); //find the edge by going over the fail-states
+
+            if (pm_goto_get(fail_status, symbol)){ //if the is a path to fail state for the symbol
+                if((FStateSetAndPrint(&(origin) , fail_status, symbol)) == -1) //set and print a fail-state
+                    return -1;
+            }
+            edge = slist_next(edge);
         }
-
-        //intiate failure state for dept 1 to be the zero state
-        tmp_state->fail = pm_tree->zerostate;
-        edge = slist_next(edge); //loop step
     }
-
-    //deal with the other states
-
-
+    slist_destroy(queue, SLIST_LEAVE_DATA);
     return 0;
 }
 
+//define the fail state of dept 1 to be zerostate
+int failToZero(pm_t *pm_tree, slist_t* queue, slist_node_t *edge) {
+    while (edge){
+        pm_state_t* tmp_state = ((pm_labeled_edge_t*)slist_data(edge))->state;
+        if (slist_append(queue, tmp_state) == -1) {
+            //pm_destroy(pm_tree);
+            return -1;
+        }
+        edge = slist_next(edge);
+        tmp_state->fail = pm_tree->zerostate;
+    }
+    return 0;
+}
+
+//search for the edge of the char by hoping back to the prvious fail state.
+// if the fail is NULL, the state fail will be the zerostate
+void findEdge(pm_t *pm_tree, pm_state_t **fail, unsigned char symbol) {
+    while (!pm_goto_get((*fail), symbol)) {
+        if (!(*fail)) {
+            (*fail) = pm_tree->zerostate;
+            break;
+        }
+        (*fail) = (*fail)->fail;
+    }
+}
+
+//set and print the fail state
+int FStateSetAndPrint(pm_state_t **origin ,pm_state_t *fail, unsigned char symbol){
+                (*origin)->fail = pm_goto_get(fail, symbol); //set the fail state on the origin (source)
+                printf("Setting f(%d) = %d\n", (*origin)->id, (*origin)->fail->id);
+
+                if (!(*origin)->output && (*origin)->fail->output){ //allocate output list
+                    (*origin)->output = (slist_t*)calloc(1, sizeof(slist_t));
+                    if (!(*origin)->output){
+                        //pm_destroy(pm_tree);
+                        return -1;
+                    }
+                }
+
+                //add the the fail state to origin output
+                if (slist_append_list((*origin)->output, (*origin)->fail->output) == -1){
+                    //pm_destroy(pm_tree);
+                    return -1;
+                }
+                return 0;
+}
 

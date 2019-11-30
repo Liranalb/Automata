@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 void slist_init(slist_t * list) {
-    if (list == NULL) { //checking if the list is empty
+    if (!list) { //checking if the list is empty
         return;
     }
 
@@ -15,13 +15,13 @@ void slist_init(slist_t * list) {
 
 
 void slist_destroy(slist_t * list, slist_destroy_t dealloc) {
-    if (list == NULL) { //checking if the list is empty
+    if (!list) { //checking if the list is empty
         return;
     }
 
     slist_node_t *tmp; // may need allocation
 
-    while(slist_head(list) !=NULL) {
+    while(slist_head(list)) {
         tmp = slist_head(list);
         slist_head(list) = slist_next(slist_head(list));
         if(dealloc) //check
@@ -35,19 +35,19 @@ int slist_append(slist_t *list,void *data) {
 
     //printf("\nStarting append\n");
 
-    if (list == NULL || data == NULL) { // checking if allocation succeed
+    if (!list || !data) { // checking if allocation succeed
         return -1;
     }
 
     slist_node_t *tmp = (slist_node_t*)malloc(sizeof(slist_node_t));
-    if (tmp == NULL) { // checking if allocation succeed
+    if (!tmp) { // checking if allocation succeed
         printf("Cannot allocate initial memory for data\n");
         return -1;
     }
 
     slist_data(tmp) = data;
 
-    if (slist_head(list) == NULL){ //if there is no head in the list
+    if (!slist_head(list)){ //if there is no head in the list
         slist_head(list) = tmp;
         slist_tail(list) = tmp;
         //printf("\ninside append 1\n");
@@ -63,7 +63,7 @@ int slist_append(slist_t *list,void *data) {
 }
 
 void *slist_pop_first(slist_t * list) {
-    if (list == NULL) { //checking if the list is empty
+    if (!list) { //checking if the list is empty
         return NULL;
     }
 
@@ -76,19 +76,19 @@ void *slist_pop_first(slist_t * list) {
 }
 
 int slist_prepend(slist_t *list,void *data) {
-    if (list == NULL) { // checking if allocation succeed
+    if (!list) { // checking if allocation succeed
         return -1;
     }
 
     slist_node_t *tmp = (slist_node_t*)malloc(sizeof(slist_node_t));
-    if (tmp == NULL) { // checking if allocation succeed
+    if (!tmp) { // checking if allocation succeed
         printf("Cannot allocate initial memory for data\n");
         return -1;
     }
 
     slist_data(tmp) = data;
 
-    if (slist_head(list) == NULL){ //if there is no head in the list
+    if (!slist_head(list)){ //if there is no head in the list
         slist_head(list) = tmp;
         slist_tail(list) = tmp;
         slist_size(list) = 1;
@@ -103,7 +103,7 @@ int slist_prepend(slist_t *list,void *data) {
 }
 
 int slist_append_list(slist_t* source, slist_t* dest) {
-    if(source == NULL || dest == NULL) {
+    if(!source || !dest) {
         return -1;
     }
 
