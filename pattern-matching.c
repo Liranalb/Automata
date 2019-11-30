@@ -57,19 +57,17 @@ int pm_goto_set(pm_state_t *from_state, unsigned char symbol, pm_state_t *to_sta
 
 pm_state_t* pm_goto_get(pm_state_t *state, unsigned char symbol) { //NEED TESTING
     if(state == NULL) {
-        printf("Cannot allocate initial memory for data\n");
         return NULL;
     }
 
     slist_node_t* tmp = state-> slist_head(_transitions); //create a temp list for checking the trans list
-    while(tmp != NULL) {
-        pm_labeled_edge_t* newEdge = ((pm_labeled_edge_t*)slist_data(tmp)); //create a new arc
-        if(newEdge->label == symbol) { //check if we have a symbol match at the arc
-            return newEdge->state; // if so, return the arc state
-        }
+    while(tmp) {
+         //create a new arc
+        if (((pm_labeled_edge_t*)slist_data(tmp))->label == symbol) //check if we have a symbol match at the arc
+            return ((pm_labeled_edge_t*)tmp->data)->state; // if so, return the arc state
+
         tmp = slist_next(tmp);
     }
-
     return NULL; // no transition found, return NULL
 }
 
@@ -155,53 +153,38 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
     return 0; //return 0 on success
 }
 
-int pm_makeFSM(pm_t *pm) {
+int pm_makeFSM(pm_t *pm_tree)
+{
+    if(pm_tree == NULL)
+        return -1;
 
-    slist_t *q = (slist_t*)malloc(sizeof(slist_t));
-    if (q == NULL) {
-        printf("Cannot allocate initial memory for data\n");
+    slist_t *queue = (slist_t*)malloc(sizeof(slist_t)); // creating a new queue
+    if(queue == NULL) { // checking alloction
+        //destroy tree
         return -1;
     }
 
-    slist_init(q); // initiate queue
+    slist_init(queue); //intiate tree
+    // creating a new edge and setting it to be the head of trans of the first state
+    slist_node_t *edge = slist_head(pm_tree->zerostate->_transitions);
 
-    slist_node_t *node;
-    for (node = pm->zerostate->slist_head(_transitions); node != NULL; node = slist_next(node)) {
-        pm_state_t *state = ((pm_labeled_edge_t*) slist_data(node))->state;
-        if (slist_append(q, state) == -1) {
+    //create a failure state for the dept = 1 to be the zerostate
+    while(edge != NULL) {
+        pm_state_t *tmp_state = ((pm_labeled_edge_t*)slist_data(edge));
+        if(slist_append(queue, tmp_state) == -1) {
+            //destroy tree;
             return -1;
         }
 
-        state->fail = pm->zerostate; //initiate the first fail state to be the root
+        //intiate failure state for dept 1 to be the zero state
+        tmp_state->fail = pm_tree->zerostate;
+        edge = slist_next(edge); //loop step
     }
 
-    while(slist_size(q) > 0) {
-        pm_state_t *red = slist_pop_first(q);
+    //deal with the other states
 
-        //going over the transitions list
-        for (node = red->slist_head(_transitions); node != NULL; node = slist_next(node)) {
-            pm_labeled_edge_t *edge = ((pm_labeled_edge_t *)slist_data(node));
-            pm_state_t *current = edge->state;
 
-            if (slist_append(q, current) == -1) {
-                return -1;
-            }
-
-            pm_state_t *state = red->fail;
-            pm_state_t *failState;
-
-            // Crash at this line:
-            while ((failState = pm_goto_get(state, edge->label)) == NULL) { //FIX SIGSEGV!!!
-                state = state->fail;
-            }
-
-            current->fail = failState;
-            printf("Settings f(%d) = %d\n", current->id, current->fail->id);
-            if (slist_append_list(current->output, current->fail->output) == -1) {
-                return -1;
-            }
-        }
-    }
-    free(q);
     return 0;
 }
+
+
