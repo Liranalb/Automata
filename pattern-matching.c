@@ -9,6 +9,7 @@
 int failToZero(pm_t *pm_tree, slist_t* queue, slist_node_t *edge);
 void findEdge(pm_t *pm_tree, pm_state_t **fail, unsigned char symbol);
 int FStateSetAndPrint(pm_state_t **origin, pm_state_t *fail, unsigned char symbol);
+void stateDestructor(pm_state_t* state, slist_node_t *queue);
 
 int pm_init(pm_t *fsm) {
     if(!fsm) {
@@ -165,7 +166,7 @@ int pm_addstring(pm_t *pm,unsigned char *str, size_t n) {
 int pm_makeFSM(pm_t *pm_tree){
     slist_t* queue = (slist_t*)malloc(sizeof(slist_t));
     if (!queue){
-        //pm_destroy(pm_tree);
+        pm_destroy(pm_tree);
         return -1;
     }
 
@@ -185,7 +186,7 @@ int pm_makeFSM(pm_t *pm_tree){
         while (edge){
             pm_state_t* origin = ((pm_labeled_edge_t*)slist_data(edge))->state;
             if (slist_append(queue, origin) == -1) {
-                //pm_destroy(pm_tree);
+                pm_destroy(origin);
                 return -1;
             }
 
@@ -209,7 +210,7 @@ int failToZero(pm_t *pm_tree, slist_t* queue, slist_node_t *edge) {
     while (edge){
         pm_state_t* tmp_state = ((pm_labeled_edge_t*)slist_data(edge))->state;
         if (slist_append(queue, tmp_state) == -1) {
-            //pm_destroy(pm_tree);
+            pm_destroy(pm_tree);
             return -1;
         }
         edge = slist_next(edge);
@@ -238,16 +239,37 @@ int FStateSetAndPrint(pm_state_t **origin ,pm_state_t *fail, unsigned char symbo
                 if (!(*origin)->output && (*origin)->fail->output){ //allocate output list
                     (*origin)->output = (slist_t*)calloc(1, sizeof(slist_t));
                     if (!(*origin)->output){
-                        //pm_destroy(pm_tree);
+
                         return -1;
                     }
                 }
 
                 //add the the fail state to origin output
                 if (slist_append_list((*origin)->output, (*origin)->fail->output) == -1){
-                    //pm_destroy(pm_tree);
+                    pm_destroy(origin);
                     return -1;
                 }
                 return 0;
 }
 
+void pm_destroy(pm_t *pm_tree) {
+    if(!pm_tree) {
+        exit(-1);
+    }
+
+    slist_node_t *queue;
+    queue = pm_tree->zerostate->slist_head(_transitions);
+    stateDestructor(pm_tree->zerostate, queue);
+    free(pm_tree);
+}
+
+void stateDestructor(pm_state_t* state, slist_node_t *queue){
+    if(!queue)
+        return;
+
+    stateDestructor(state, queue->next);
+
+    slist_destroy(state->_transitions, SLIST_FREE_DATA);
+    slist_destroy(state->output, SLIST_LEAVE_DATA);
+    free(state);
+}
