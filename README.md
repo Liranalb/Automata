@@ -1,6 +1,6 @@
 # String Pattern Matching Algorithm
-
 This program has been developed as part of my B.Sc in Software Engineering program at Jerusalem College of Engineering.
+
 
 ## Background
 String pattern matching algorithms are very useful for several purposes, like simple search for a pattern in a text or looking for attacks with predefined signatures.
@@ -19,6 +19,10 @@ The failure transition from s is always to a state s', whose label L(s') is the 
 The DFA is traversed starting from root. When the traversal goes through an accepting state, it indicates that some patterns are a suffix of the input; one of these patterns always corresponds to the label of the accepting state.
 Finally, we denote by scan(s,b), the AC procedure when reading input symbol b while in state s; namely, transiting to a new state s' after traversing failure transitions and a forward transition as necessary, and reporting matched patterns in case s'.output != emptyset. scan(s,b) returns the new state s' as an output. 
 
+
+<p align="center">
+<img align="center" src="https://github.com/Liranalb/Automata/blob/master/example.jpg" height="400" width="400">
+</p>
 
 ## The Program
 The algorithm operation:
